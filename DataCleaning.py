@@ -21,7 +21,7 @@ def inspect_data(df):
     df.info(memory_usage='deep')
 
     print("\nFirst 5 Rows:")
-    display(df.head())
+    print(df.head())
 
 
 def handle_missing_values(df):
