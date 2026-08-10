@@ -68,6 +68,14 @@ def remove_outliers(df, column_name):
 
     return df
 
+def inconsistent_data(df, column_names):
+
+    for column_name in column_names:
+        df[column_name] = (df[column_name].str.strip().str.title())
+
+    return df
+
+
 def clean_data(df):
 
     df = handle_missing_values(df)
@@ -77,5 +85,7 @@ def clean_data(df):
     df = remove_duplicates(df)
 
     df = remove_outliers(df, 'Sales')
+
+    df = inconsistent_data(df,['Ship Mode','Segment','Country/Region','City','State','Region','Category','Sub-Category'])
 
     return df
