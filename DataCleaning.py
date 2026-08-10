@@ -35,13 +35,13 @@ def handle_missing_values(df):
 
 def convert_data_types(df):
 
-    df['Row ID'] = (df['Row ID'].astype('int64'))
+    df['Row ID'] = df['Row ID'].astype('int64')
 
-    df['Postal Code'] = (df['Postal Code'].astype('str'))
+    df['Postal Code'] = df['Postal Code'].astype('str')
 
-    df['Order Date'] = df['Order Date'].dt.date
+    df['Order Date'] = pd.to_datetime(df['Order Date'])
 
-    df['Ship Date'] = df['Ship Date'].dt.date
+    df['Ship Date'] = pd.to_datetime(df['Ship Date'])
 
     return df
 
