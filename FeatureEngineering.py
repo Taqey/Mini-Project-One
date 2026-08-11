@@ -1,4 +1,5 @@
 import pandas as pd
+import numpy as np
 def order_date(df):
     df['Month'] = df['Order Date'].dt.month
     df['Year'] = df['Order Date'].dt.year
@@ -29,6 +30,29 @@ def customer_features(df):
     ).dt.days
     return customer_features
 
+
+def customer_segmentation(rfm):
+
+    conditions = [
+        (rfm["RFM_Score"] >= 111) & (rfm["RFM_Score"] <= 222),
+        (rfm["RFM_Score"] >= 223) & (rfm["RFM_Score"] <= 333),
+        (rfm["RFM_Score"] >= 334) & (rfm["RFM_Score"] <= 444),
+        (rfm["RFM_Score"] >= 445) & (rfm["RFM_Score"] <= 499),
+        (rfm["RFM_Score"] >= 500) & (rfm["RFM_Score"] <= 555)
+    ]
+
+    choices = [
+        "Lost",
+        "At Risk",
+        "Promising",
+        "Loyal",
+        "Champion"
+    ]
+
+    rfm["Customer Segment"] = np.select(conditions,choices,default="Unknown")
+
+    return rfm
+
 def rfm(df):
     reference_date = df["Order Date"].max() + pd.Timedelta(days=1)
     rfm = df.groupby("Customer ID", observed=True).agg(
@@ -36,10 +60,19 @@ def rfm(df):
         frequency=("Order ID", "nunique"),
         monetary_value=("Sales", "sum"),
     ).reset_index()
-
+    rfm["r_score"] = pd.qcut(rfm["recency"], 5, labels=[5, 4, 3, 2, 1])
+    rfm["f_score"] = pd.qcut(rfm["frequency"].rank(method="first"), 5, labels=[1, 2, 3, 4, 5])
+    rfm["m_score"] = pd.qcut(rfm["monetary_value"], 5, labels=[1, 2, 3, 4, 5])
+    rfm["RFM_Score"] = rfm["r_score"].astype(str) + rfm["f_score"].astype(str) + rfm["m_score"].astype(str)
+    rfm["RFM_Score"] = rfm["RFM_Score"].astype(int)
+    rfm.sort_values("RFM_Score", ascending=False, inplace=True)
+    rfm = customer_segmentation(rfm)
     return rfm
+
+
 
 def feature_engineering(df):
     df = order_date(df)
     df = order_price(df)
+
     return df
