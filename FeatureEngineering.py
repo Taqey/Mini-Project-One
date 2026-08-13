@@ -69,7 +69,9 @@ def rfm(df):
     rfm = customer_segmentation(rfm)
     return rfm
 
-
+def merge_rfm(df, rfm, key='Customer ID'):
+    """Merge the transactional df with the rfm segment table on Customer ID."""
+    return df.merge(rfm, on=key, how='left')
 
 def feature_engineering(df):
     df = order_date(df)
