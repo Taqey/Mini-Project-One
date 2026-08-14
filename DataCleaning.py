@@ -83,6 +83,14 @@ def convert_data_types(df):
     df['Postal Code'] = df['Postal Code'].astype('str')
     df['Order Date'] = pd.to_datetime(df['Order Date'])
     df['Ship Date'] = pd.to_datetime(df['Ship Date'])
+    df['Ship Mode'] = df['Ship Mode'].astype('category')
+    df['Segment'] = df['Segment'].astype('category')
+    df['Country/Region'] = df['Country/Region'].astype('category')
+    df['City'] = df['City'].astype('category')
+    df['State'] = df['State'].astype('category')
+    df['Region'] = df['Region'].astype('category')
+    df['Category'] = df['Category'].astype('category')
+    df['Sub-Category'] = df['Sub-Category'].astype('category')
     return df
 
 def remove_duplicates(df):
@@ -114,11 +122,11 @@ def inconsistent_data(df, column_names):
 
 def clean_data(df):
     df = handle_missing_values(df)
-    df = convert_data_types(df)
     df = remove_duplicates(df)
     df = remove_outliers(df, 'Sales')
     df = inconsistent_data(
         df,
         ['Ship Mode', 'Segment', 'Country/Region', 'City', 'State', 'Region', 'Category', 'Sub-Category']
     )
+    df = convert_data_types(df)
     return df

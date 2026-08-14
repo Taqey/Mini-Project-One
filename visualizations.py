@@ -10,9 +10,7 @@ def merge_rfm(df, rfm, key='Customer ID'):
     return df.merge(rfm[[key, 'Customer Segment']], on=key, how='left')
 
 
-# ============================================================
-# 1. Customer Segmentation by RFM Score
-# ============================================================
+
 
 def plot_rfm_segment_distribution(rfm, segment_col='Customer Segment'):
     segment_counts = rfm[segment_col].value_counts()
@@ -31,20 +29,16 @@ def plot_rfm_segment_distribution(rfm, segment_col='Customer Segment'):
     plt.show()
 
 
-# ============================================================
-# 2. Dominant RFM Segment per City/State
-# ============================================================
 
-def plot_dominant_segment_heatmap(merged_df, region_col='State', segment_col='Customer Segment'):
-    # crosstab: rows = region, columns = segment, values = counts
+def plot_dominant_segment_heatmap(merged_df, region_col='State', segment_col='Customer Segment', top_n=10):
     pivot = pd.crosstab(merged_df[region_col], merged_df[segment_col])
 
-    # (optional) sort rows by total count عشان الترتيب يبقى أوضح
     pivot = pivot.loc[pivot.sum(axis=1).sort_values(ascending=False).index]
+    pivot = pivot.head(top_n)  # ← أعلى top_n بس
 
     plt.figure(figsize=(max(8, pivot.shape[1] * 1.2), max(6, pivot.shape[0] * 0.4)))
     sns.heatmap(pivot, annot=True, fmt='d', cmap='mako', linewidths=0.5, cbar_kws={'label': 'Count'})
-    plt.title(f'{segment_col} Distribution by {region_col}')
+    plt.title(f'Top {top_n} {region_col} by {segment_col} Distribution')
     plt.xlabel(segment_col)
     plt.ylabel(region_col)
     plt.tight_layout()
@@ -53,9 +47,7 @@ def plot_dominant_segment_heatmap(merged_df, region_col='State', segment_col='Cu
     return pivot
 
 
-# ============================================================
-# 3. Revenue by City/State
-# ============================================================
+
 
 def plot_revenue_by_region(df, region_col='State', revenue_col='Sales', top_n=10):
     revenue = (
@@ -64,6 +56,7 @@ def plot_revenue_by_region(df, region_col='State', revenue_col='Sales', top_n=10
         .sort_values(ascending=False)
         .head(top_n)
     )
+    revenue.index = revenue.index.astype(str)  # ← يشيل الـ category dtype
 
     plt.figure(figsize=(10, 6))
     sns.barplot(x=revenue.values, y=revenue.index, palette='rocket')
@@ -73,10 +66,6 @@ def plot_revenue_by_region(df, region_col='State', revenue_col='Sales', top_n=10
     plt.tight_layout()
     plt.show()
 
-
-# ============================================================
-# 4. Revenue Trend Over Time
-# ============================================================
 
 def plot_revenue_trend(df, date_col='Order Date', revenue_col='Sales', freq='ME'):
     trend = (
@@ -93,9 +82,6 @@ def plot_revenue_trend(df, date_col='Order Date', revenue_col='Sales', freq='ME'
     plt.tight_layout()
     plt.show()
 
-# ============================================================
-# 5. Top Products/Categories by Revenue
-# ============================================================
 
 def plot_top_products_revenue_vs_profit(df, product_col='Sub-Category', 
                                           revenue_col='Sales', profit_col='Profit', top_n=10):
@@ -121,9 +107,7 @@ def plot_top_products_revenue_vs_profit(df, product_col='Sub-Category',
 
     return grouped.sort_values(revenue_col, ascending=False)
 
-# ============================================================
-# 6. Average Order Value (AOV) by RFM Segment
-# ============================================================
+
 
 def plot_aov_by_segment(merged_df, segment_col='Customer Segment', revenue_col='Sales', order_col='Order ID'):
     aov = (
